@@ -54,7 +54,12 @@ class DatabaseConfigRepository implements ConfigRepositoryInterface
     {
         $this->ensureTable();
         $json = json_encode($config);
-        $stmt = $this->pdo->prepare("INSERT OR REPLACE INTO {$this->tablePrefix}devices (device_id, config, updated_at) VALUES (?, ?, datetime('now'))");
+        $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        $stmt = match ($driverName) {
+            'mysql'  => $this->pdo->prepare("REPLACE INTO {$this->tablePrefix}devices (device_id, config, updated_at) VALUES (?, ?, NOW())"),
+            'pgsql'  => $this->pdo->prepare("INSERT INTO {$this->tablePrefix}devices (device_id, config, updated_at) VALUES (?, ?, NOW()) ON CONFLICT (device_id) DO UPDATE SET config = EXCLUDED.config, updated_at = NOW()"),
+            default  => $this->pdo->prepare("INSERT OR REPLACE INTO {$this->tablePrefix}devices (device_id, config, updated_at) VALUES (?, ?, datetime('now'))"),
+        };
         $stmt->execute([$deviceId, $json]);
         $this->cache['devices'][$deviceId] = $config;
     }
@@ -99,8 +104,15 @@ class DatabaseConfigRepository implements ConfigRepositoryInterface
     public function addGatewayRule(array $rule): void
     {
         $this->ensureTable();
-        $stmt = $this->pdo->prepare("INSERT OR REPLACE INTO {$this->tablePrefix}gateway_rules (rule_id, config) VALUES (?, ?)");
-        $stmt->execute([$rule['id'] ?? uniqid('rule_'), json_encode($rule)]);
+        $ruleId = $rule['id'] ?? uniqid('rule_');
+        $json = json_encode($rule);
+        $driverName = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        $stmt = match ($driverName) {
+            'mysql'  => $this->pdo->prepare("REPLACE INTO {$this->tablePrefix}gateway_rules (rule_id, config) VALUES (?, ?)"),
+            'pgsql'  => $this->pdo->prepare("INSERT INTO {$this->tablePrefix}gateway_rules (rule_id, config) VALUES (?, ?) ON CONFLICT (rule_id) DO UPDATE SET config = EXCLUDED.config"),
+            default  => $this->pdo->prepare("INSERT OR REPLACE INTO {$this->tablePrefix}gateway_rules (rule_id, config) VALUES (?, ?)"),
+        };
+        $stmt->execute([$ruleId, $json]);
     }
 
     public function removeGatewayRule(string $ruleId): void

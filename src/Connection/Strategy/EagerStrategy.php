@@ -16,9 +16,7 @@ class EagerStrategy implements StrategyInterface
     public function getOrCreate(string $deviceId, callable $factory): ConnectorInterface
     {
         if (!isset($this->connections[$deviceId])) {
-            $connector = $factory();
-            $connector->connect();
-            $this->connections[$deviceId] = $connector;
+            $this->connections[$deviceId] = $factory();
         }
         return $this->connections[$deviceId];
     }

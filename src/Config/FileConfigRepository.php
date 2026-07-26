@@ -31,11 +31,13 @@ class FileConfigRepository implements ConfigRepositoryInterface
     public function setDeviceConfig(string $deviceId, array $config): void
     {
         $this->config['devices'][$deviceId] = $config;
+        $this->persist();
     }
 
     public function removeDeviceConfig(string $deviceId): void
     {
         unset($this->config['devices'][$deviceId]);
+        $this->persist();
     }
 
     public function getAllDeviceConfigs(): array
@@ -61,6 +63,7 @@ class FileConfigRepository implements ConfigRepositoryInterface
     public function addGatewayRule(array $rule): void
     {
         $this->config['gateway']['rules'][] = $rule;
+        $this->persist();
     }
 
     public function removeGatewayRule(string $ruleId): void
@@ -69,5 +72,12 @@ class FileConfigRepository implements ConfigRepositoryInterface
             $this->config['gateway']['rules'] ?? [],
             fn(array $rule) => ($rule['id'] ?? '') !== $ruleId,
         ));
+        $this->persist();
+    }
+
+    private function persist(): void
+    {
+        $export = var_export($this->config, true);
+        file_put_contents($this->configPath, '<?php return ' . $export . ';');
     }
 }

@@ -127,7 +127,10 @@ class GatewayEngine
             }
 
             // Transform
-            $value = $sourceData[$rule->sourcePoint] ?? null;
+            if (!array_key_exists($rule->sourcePoint, $sourceData)) {
+                throw new \RuntimeException("Source point not found in response: {$rule->sourcePoint}");
+            }
+            $value = $sourceData[$rule->sourcePoint];
             if ($rule->transform !== null) {
                 $value = ($rule->transform)($value);
             }

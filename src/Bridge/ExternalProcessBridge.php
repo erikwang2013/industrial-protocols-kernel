@@ -61,7 +61,7 @@ class ExternalProcessBridge implements BridgeInterface
                     $buffer .= $chunk;
                 }
             }
-            if (str_contains($buffer, 'READY') || str_contains($buffer, 'started')) {
+            if (preg_match('/(?:^|\n)\s*READY\s*(?:\n|$)/', $buffer) || preg_match('/(?:^|\n)\s*started\s*(?:\n|$)/', $buffer)) {
                 $this->ready = true;
                 break;
             }
@@ -106,8 +106,21 @@ class ExternalProcessBridge implements BridgeInterface
         $line = $command . ' ' . $input . "\n";
         fwrite($this->pipes[0], $line);
 
-        $response = fgets($this->pipes[1]);
-        if ($response === false) {
+        // Read response with timeout using non-blocking I/O
+        $response = '';
+        $deadline = microtime(true) + 5.0;
+        stream_set_blocking($this->pipes[1], false);
+        while (microtime(true) < $deadline) {
+            $chunk = fread($this->pipes[1], 4096);
+            if ($chunk !== false && $chunk !== '') {
+                $response .= $chunk;
+            } elseif (feof($this->pipes[1])) {
+                break;
+            }
+            usleep(10000);
+        }
+        stream_set_blocking($this->pipes[1], true);
+        if ($response === '') {
             throw new \RuntimeException('Bridge process closed unexpectedly');
         }
 

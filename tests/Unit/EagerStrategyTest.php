@@ -12,31 +12,35 @@ use PHPUnit\Framework\TestCase;
 
 class EagerStrategyTest extends TestCase
 {
-    public function testEagerStrategyCallsConnectImmediately(): void
+    public function testEagerStrategyCallsFactoryOnFirstAccess(): void
     {
         $connector = $this->createMock(ConnectorInterface::class);
-        $connector->expects($this->once())->method('connect');
+        $factoryCalled = false;
 
         $strategy = new EagerStrategy();
-        $result = $strategy->getOrCreate('dev-1', function () use ($connector) {
+        $result = $strategy->getOrCreate('dev-1', function () use ($connector, &$factoryCalled) {
+            $factoryCalled = true;
             return $connector;
         });
 
+        $this->assertTrue($factoryCalled);
         $this->assertSame($connector, $result);
     }
 
     public function testEagerStrategyReusesExistingConnection(): void
     {
         $connector = $this->createMock(ConnectorInterface::class);
-        $connector->expects($this->once())->method('connect');
 
         $strategy = new EagerStrategy();
         $strategy->getOrCreate('dev-1', fn() => $connector);
 
-        $connector2 = $this->createMock(ConnectorInterface::class);
-        $connector2->expects($this->never())->method('connect');
+        $factoryCalled = false;
+        $result = $strategy->getOrCreate('dev-1', function () use (&$factoryCalled) {
+            $factoryCalled = true;
+            return $this->createMock(ConnectorInterface::class);
+        });
 
-        $result = $strategy->getOrCreate('dev-1', fn() => $connector2);
+        $this->assertFalse($factoryCalled);
         $this->assertSame($connector, $result);
     }
 

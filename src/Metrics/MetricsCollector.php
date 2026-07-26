@@ -76,6 +76,10 @@ class MetricsCollector
             $sum = array_sum($buckets);
             $lines[] = "# HELP {$namespace}_{$name} Histogram of {$name}";
             $lines[] = "# TYPE {$namespace}_{$name} histogram";
+            foreach ($buckets as $b) {
+                $lines[] = "{$namespace}_{$name}_bucket{$labelStr}{le=\"$b\"} " . count(array_filter($buckets, fn($v) => $v <= $b));
+            }
+            $lines[] = "{$namespace}_{$name}_bucket{$labelStr}{le=\"+Inf\"} $count";
             $lines[] = "{$namespace}_{$name}_count{$labelStr} $count";
             $lines[] = "{$namespace}_{$name}_sum{$labelStr} $sum";
         }
@@ -89,7 +93,7 @@ class MetricsCollector
         ksort($labels);
         $parts = [$name];
         foreach ($labels as $k => $v) {
-            $parts[] = "$k=$v";
+            $parts[] = "$k=" . str_replace('|', '_', $v);
         }
         return implode('|', $parts);
     }

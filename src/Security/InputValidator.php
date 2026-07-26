@@ -27,6 +27,9 @@ class InputValidator
         $host = trim($host);
         if ($host === '') throw new \InvalidArgumentException('Host cannot be empty');
         if (strlen($host) > 255) throw new \InvalidArgumentException('Host too long');
+        if (!filter_var($host, FILTER_VALIDATE_IP) && !filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            throw new \InvalidArgumentException("Invalid host: $host");
+        }
         return $host;
     }
 

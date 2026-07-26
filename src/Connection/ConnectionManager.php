@@ -33,6 +33,9 @@ class ConnectionManager
     public function connect(string $deviceId): ConnectorInterface
     {
         $config = $this->configRepo->getDeviceConfig($deviceId);
+        if (!isset($config['protocol'])) {
+            throw new \RuntimeException("Device config missing 'protocol' key: $deviceId");
+        }
         $protocolName = $config['protocol'];
 
         if (!isset($this->protocols[$protocolName])) {

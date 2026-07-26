@@ -19,20 +19,14 @@ class FiberCoroutineAdapter implements CoroutineAdapterInterface
     }
     public function sleep(float $seconds): void
     {
-        $fiber = new Fiber(function () use ($seconds) {
-            Fiber::suspend();
-            usleep((int)($seconds * 1_000_000));
-        });
-        $fiber->start();
-        $fiber->resume();
+        usleep((int)($seconds * 1_000_000));
     }
     public function parallel(array $callables): array
     {
         $results = [];
-        foreach ($callables as $callable) {
-            $fiber = new Fiber($callable);
-            $results[] = $fiber->start();
+        foreach ($callables as $index => $callable) {
+            $results[$index] = $callable();
         }
-        return $results;
+        return array_values($results);
     }
 }

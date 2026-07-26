@@ -18,6 +18,9 @@ class WebhookAlertChannel implements AlertChannelInterface
             'content' => $payload,
             'timeout' => $this->timeout,
         ]]);
-        @file_get_contents($this->url, false, $ctx);
+        $result = @file_get_contents($this->url, false, $ctx);
+        if ($result === false) {
+            throw new \RuntimeException("Webhook delivery failed: {$this->url}");
+        }
     }
 }

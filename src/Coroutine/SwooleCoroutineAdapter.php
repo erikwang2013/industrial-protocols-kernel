@@ -25,14 +25,19 @@ class SwooleCoroutineAdapter implements CoroutineAdapterInterface
     {
         $result = null;
         $exception = null;
+        $channel = new Channel(1);
 
-        Coroutine::create(function () use ($fn, &$result, &$exception) {
+        Coroutine::create(function () use ($fn, &$result, &$exception, $channel) {
             try {
                 $result = $fn();
+                $channel->push(true);
             } catch (\Throwable $e) {
                 $exception = $e;
+                $channel->push(false);
             }
         });
+
+        $channel->pop();
 
         if ($exception) {
             throw $exception;
