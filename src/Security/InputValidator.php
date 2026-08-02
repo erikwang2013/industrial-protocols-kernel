@@ -47,6 +47,9 @@ class InputValidator
      */
     public static function modbusAddress(string $address): string
     {
+        if (!is_numeric($address)) {
+            throw new \InvalidArgumentException("Register address must be numeric: $address");
+        }
         $addr = (int)$address;
         if ($addr < 0 || $addr > 65535) throw new \InvalidArgumentException("Register address out of range: $address");
         return $address;

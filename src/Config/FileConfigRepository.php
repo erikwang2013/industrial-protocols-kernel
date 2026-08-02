@@ -53,6 +53,7 @@ class FileConfigRepository implements ConfigRepositoryInterface
     public function setDataPoints(string $deviceId, array $points): void
     {
         $this->config['devices'][$deviceId]['points'] = $points;
+        $this->persist();
     }
 
     public function getGatewayRules(): array
@@ -77,7 +78,6 @@ class FileConfigRepository implements ConfigRepositoryInterface
 
     private function persist(): void
     {
-        $export = var_export($this->config, true);
-        file_put_contents($this->configPath, '<?php return ' . $export . ';');
+        file_put_contents($this->configPath, '<?php return ' . var_export($this->config, true) . ';');
     }
 }

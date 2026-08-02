@@ -29,14 +29,19 @@ class CircuitBreaker
         if ($this->openedAt === null) {
             return false;
         }
-
-        // Check if cooldown has elapsed → transition to half-open
         if (microtime(true) - $this->openedAt >= $this->cooldownSeconds) {
-            $this->openedAt = null;
-            return false; // HALF_OPEN
+            return false; // Cooldown elapsed — circuit is now half-open
         }
-
         return true; // OPEN
+    }
+
+    public function attemptReset(): bool
+    {
+        if ($this->openedAt !== null && microtime(true) - $this->openedAt >= $this->cooldownSeconds) {
+            $this->openedAt = null;
+            return true;
+        }
+        return false;
     }
 
     public function recordSuccess(): void

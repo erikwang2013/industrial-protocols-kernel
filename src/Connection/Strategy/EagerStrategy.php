@@ -13,6 +13,21 @@ class EagerStrategy implements StrategyInterface
     /** @var array<string, ConnectorInterface> */
     private array $connections = [];
 
+    /** @var array<string, bool> */
+    private array $preloaded = [];
+
+    /**
+     * @param array<int, array{deviceId: string, factory: callable}> $preload
+     */
+    public function __construct(private array $preload = [])
+    {
+        foreach ($preload as $entry) {
+            $deviceId = $entry['deviceId'];
+            $this->connections[$deviceId] = $entry['factory']();
+            $this->preloaded[$deviceId] = true;
+        }
+    }
+
     public function getOrCreate(string $deviceId, callable $factory): ConnectorInterface
     {
         if (!isset($this->connections[$deviceId])) {
@@ -25,7 +40,7 @@ class EagerStrategy implements StrategyInterface
     {
         if (isset($this->connections[$deviceId])) {
             $this->connections[$deviceId]->disconnect();
-            unset($this->connections[$deviceId]);
+            unset($this->connections[$deviceId], $this->preloaded[$deviceId]);
         }
     }
 
@@ -35,6 +50,7 @@ class EagerStrategy implements StrategyInterface
             $connector->disconnect();
             unset($this->connections[$id]);
         }
+        $this->preloaded = [];
     }
 
     public function getActiveConnections(): array

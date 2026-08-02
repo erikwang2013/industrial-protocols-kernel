@@ -64,6 +64,7 @@ class GatewayEngine
     {
         $results = [];
         $tasks = [];
+        $taskIds = [];
 
         foreach ($this->rules as $ruleId => $rule) {
             if ($rule->trigger !== 'poll') continue;
@@ -71,13 +72,17 @@ class GatewayEngine
             $breaker = $this->breakers[$ruleId];
             if ($breaker->isOpen()) continue;
 
-            $tasks[$ruleId] = function () use ($rule, $breaker, &$results, $ruleId) {
-                $results[$ruleId] = $this->executeRule($rule, $breaker);
+            $taskIds[] = $ruleId;
+            $tasks[] = function () use ($rule, $breaker) {
+                return $this->executeRule($rule, $breaker);
             };
         }
 
         if (!empty($tasks)) {
-            $this->coroutine->parallel(array_values($tasks));
+            $taskResults = $this->coroutine->parallel($tasks);
+            foreach ($taskIds as $i => $ruleId) {
+                $results[$ruleId] = $taskResults[$i] ?? ['status' => 'error', 'rule' => $ruleId, 'error' => 'No result'];
+            }
         }
 
         return $results;

@@ -7,7 +7,14 @@ namespace Erikwang2013\IndustrialProtocols\Alert;
 
 class WebhookAlertChannel implements AlertChannelInterface
 {
-    public function __construct(private string $url, private int $timeout = 5) {}
+    public function __construct(
+        private string $url,
+        private int $timeout = 5,
+    ) {
+        if (!filter_var($this->url, FILTER_VALIDATE_URL) || !in_array(parse_url($this->url, PHP_URL_SCHEME), ['http', 'https'], true)) {
+            throw new \InvalidArgumentException("Invalid webhook URL: {$this->url}");
+        }
+    }
 
     public function send(string $title, string $message, string $level = 'info'): void
     {

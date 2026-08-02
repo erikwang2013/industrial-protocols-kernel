@@ -32,13 +32,10 @@ class ExternalProcessBridge implements BridgeInterface
             2 => ['pipe', 'w'],  // stderr
         ];
 
-        $env = array_merge($_ENV ?? [], $this->env);
+        $env = array_merge(getenv() ?: [], $this->env);
         $cwd = $this->workDir ?: dirname($this->executable);
 
-        $cmd = $this->executable;
-        if (str_starts_with($cmd, './') || str_starts_with($cmd, '/')) {
-            $cmd = escapeshellcmd($cmd);
-        }
+        $cmd = escapeshellcmd($this->executable);
 
         $this->process = proc_open($cmd, $descriptors, $this->pipes, $cwd, $env);
 

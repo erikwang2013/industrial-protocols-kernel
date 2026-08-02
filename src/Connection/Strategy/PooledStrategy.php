@@ -13,11 +13,8 @@ class PooledStrategy implements StrategyInterface
     /** @var array<string, array<ConnectorInterface>> */
     private array $pools = [];
 
-    /** @var array<string, int> */
-    private array $nextIndex = [];
-
     /** @var array<string, ConnectorInterface> */
-    private array $activeConnections = [];
+    private array $nextIndex = [];
 
     public function __construct(private int $poolSize = 4) {}
 
@@ -27,7 +24,6 @@ class PooledStrategy implements StrategyInterface
             $this->pools[$deviceId] = [];
             for ($i = 0; $i < $this->poolSize; $i++) {
                 $connector = $factory();
-                $connector->connect();
                 $this->pools[$deviceId][] = $connector;
             }
             $this->nextIndex[$deviceId] = 0;

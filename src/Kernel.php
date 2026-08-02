@@ -81,7 +81,9 @@ class Kernel
 
     public function shutdown(): void
     {
-        $this->connectionManager?->shutdown();
+        if (isset($this->connectionManager)) {
+            $this->connectionManager->shutdown();
+        }
         $this->booted = false;
     }
 
@@ -114,6 +116,7 @@ class Kernel
 
     public function getFramework(): FrameworkAdapterInterface
     {
+        $this->ensureBooted();
         return $this->framework;
     }
 
