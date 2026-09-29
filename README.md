@@ -18,11 +18,11 @@ composer require erikwang2013/industrial-protocols-kernel erikwang2013/industria
 
 ## 功能
 
-ProtocolRegistry 协议自动发现与注册、ConnectionManager 连接管理（Lazy/Eager/Pooled 三种策略+健康检查+自动重连）、ConfigRepository 配置管理（File/Database/Env 三种实现）、GatewayEngine 网关引擎（poll/change/cron 触发+CircuitBreaker 熔断器+Transform 变换管道）、CoroutineAdapter 协程适配（Swoole→Fiber→Sync 三级降级）、6 框架适配器（Laravel/Webman/Hyperf/ThinkPHP/Yii2/PlainPHP）、BridgeInterface 硬件桥接（ExternalProcessBridge+TcpGatewayBridge+BridgeConnector）、VendorProfile 厂商预置配置（12家+VendorBridgeFactory）、Event 事件系统（PSR-14 标准，13种事件）、Log 日志驱动（PsrLogDriver/FileLogDriver/NullLogDriver）、Retry 重试策略（NoRetry/FixedRetry/ExponentialBackoff+Jitter）、Metrics 指标采集（Counter/Gauge/Histogram+Prometheus导出）、Alert 告警通道（AlertManager+Webhook/Log）、Security 安全校验（InputValidator 输入校验）、Exception 异常体系（20+分层异常）
+ProtocolRegistry 协议自动发现与注册、ConnectionManager 连接管理（Lazy/Eager/Pooled 三种策略+健康检查+自动重连）、ConfigRepository 配置管理（File/Database/Env 三种实现）、GatewayEngine 网关引擎（poll/change/cron 触发+CircuitBreaker 熔断器+Transform 变换管道）、CoroutineAdapter 协程适配（Swoole→Fiber→Sync 三级降级）、7 框架适配器（Laravel/Webman/Hyperf/ThinkPHP/Yii2/Yii3/PlainPHP）、BridgeInterface 硬件桥接（ExternalProcessBridge+TcpGatewayBridge+BridgeConnector）、VendorProfile 厂商预置配置（12家+VendorBridgeFactory）、Event 事件系统（PSR-14 标准，13种事件）、Log 日志驱动（PsrLogDriver/FileLogDriver/NullLogDriver）、Retry 重试策略（NoRetry/FixedRetry/ExponentialBackoff+Jitter）、Metrics 指标采集（Counter/Gauge/Histogram+Prometheus导出）、Alert 告警通道（AlertManager+Webhook/Log）、Security 安全校验（InputValidator 输入校验）、Exception 异常体系（20+分层异常）
 
 ## 支持的框架
 
-本包通过内核的框架适配器兼容以下 6 种 PHP 运行时环境：Laravel (ServiceProvider+Facade+artisan)、Webman (config/plugin 自动发现+ProtocolProcess)、Hyperf (ConfigProvider+DI+KernelFactory)、ThinkPHP (services.php+IndustrialProtocolsService)、Yii2 (Bootstrap+组件注册)、Plain PHP (直接实例化 Kernel)
+本包通过内核的框架适配器兼容以下 7 种 PHP 运行时环境：Laravel (ServiceProvider+Facade+artisan)、Webman (config/plugin 自动发现+ProtocolProcess)、Hyperf (ConfigProvider+DI+KernelFactory)、ThinkPHP (services.php+IndustrialProtocolsService)、Yii2 (Bootstrap+组件注册)、Yii3 (DI 容器+KernelFactory)、Plain PHP (直接实例化 Kernel)
 
 ### Laravel 示例
 
@@ -50,6 +50,24 @@ Worker 启动时 ProtocolProcess 自动初始化。配置 `config/plugin/erikwan
 
 ```php
 $kernel = \Hyperf\Context\ApplicationContext::getContainer()->get(Kernel::class);
+$conn = $kernel->getConnectionManager()->connect('device-id');
+```
+
+### Yii3 示例
+
+在 `config/common/di.php` 中把 Kernel 指向工厂，Yii3 容器默认共享实例：
+
+```php
+use Erikwang2013\IndustrialProtocols\Framework\Yii3\KernelFactory;
+use Erikwang2013\IndustrialProtocols\Kernel;
+
+return [
+    Kernel::class => [KernelFactory::class, 'create'],
+];
+```
+
+```php
+$kernel = $container->get(Kernel::class);
 $conn = $kernel->getConnectionManager()->connect('device-id');
 ```
 

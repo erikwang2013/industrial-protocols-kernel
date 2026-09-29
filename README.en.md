@@ -18,11 +18,11 @@ Micro-kernel + Protocol SDK. The kernel only defines what a protocol is (6 core 
 
 ## Features
 
-ProtocolRegistry auto-discovery, ConnectionManager (Lazy/Eager/Pooled strategies+health check+auto-reconnect), ConfigRepository (File/Database/Env), GatewayEngine (poll/change/cron+CircuitBreaker+Transform pipeline), CoroutineAdapter (Swoole→Fiber→Sync), 6 framework adapters (Laravel/Webman/Hyperf/ThinkPHP/Yii2/PlainPHP), BridgeInterface (ExternalProcessBridge+TcpGatewayBridge+BridgeConnector), VendorProfile (12 vendors+VendorBridgeFactory), Event system (PSR-14, 13 types), Log drivers (PsrLogDriver/FileLogDriver/NullLogDriver), Retry strategies (NoRetry/Fixed/ExponentialBackoff+Jitter), Metrics (Counter/Gauge/Histogram+Prometheus), Alert channels (AlertManager+Webhook/Log), Security (InputValidator), Exceptions (20+ types)
+ProtocolRegistry auto-discovery, ConnectionManager (Lazy/Eager/Pooled strategies+health check+auto-reconnect), ConfigRepository (File/Database/Env), GatewayEngine (poll/change/cron+CircuitBreaker+Transform pipeline), CoroutineAdapter (Swoole→Fiber→Sync), 7 framework adapters (Laravel/Webman/Hyperf/ThinkPHP/Yii2/Yii3/PlainPHP), BridgeInterface (ExternalProcessBridge+TcpGatewayBridge+BridgeConnector), VendorProfile (12 vendors+VendorBridgeFactory), Event system (PSR-14, 13 types), Log drivers (PsrLogDriver/FileLogDriver/NullLogDriver), Retry strategies (NoRetry/Fixed/ExponentialBackoff+Jitter), Metrics (Counter/Gauge/Histogram+Prometheus), Alert channels (AlertManager+Webhook/Log), Security (InputValidator), Exceptions (20+ types)
 
 ## Supported Frameworks
 
-Compatible with 6 PHP runtimes via kernel framework adapters: Laravel (ServiceProvider+Facade+artisan), Webman (config/plugin auto-discovery+ProtocolProcess), Hyperf (ConfigProvider+DI+KernelFactory), ThinkPHP (services.php+IndustrialProtocolsService), Yii2 (Bootstrap+component), Plain PHP (direct Kernel instantiation)
+Compatible with 7 PHP runtimes via kernel framework adapters: Laravel (ServiceProvider+Facade+artisan), Webman (config/plugin auto-discovery+ProtocolProcess), Hyperf (ConfigProvider+DI+KernelFactory), ThinkPHP (services.php+IndustrialProtocolsService), Yii2 (Bootstrap+component), Yii3 (DI container+KernelFactory), Plain PHP (direct Kernel instantiation)
 
 ### Laravel
 
@@ -42,6 +42,24 @@ Auto-boot via ProtocolProcess on worker start. Configure at `config/plugin/erikw
 
 ```php
 $kernel = \Hyperf\Context\ApplicationContext::getContainer()->get(Kernel::class);
+```
+
+### Yii3
+
+Point the Kernel at the factory in `config/common/di.php`; the Yii3 container is shared by default:
+
+```php
+use Erikwang2013\IndustrialProtocols\Framework\Yii3\KernelFactory;
+use Erikwang2013\IndustrialProtocols\Kernel;
+
+return [
+    Kernel::class => [KernelFactory::class, 'create'],
+];
+```
+
+```php
+$kernel = $container->get(Kernel::class);
+$conn = $kernel->getConnectionManager()->connect('device-id');
 ```
 
 ## Usage

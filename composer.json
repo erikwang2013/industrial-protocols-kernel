@@ -14,6 +14,9 @@
     "extra": {
         "industrial-protocols": {
             "type": "kernel"
+        },
+        "hyperf": {
+            "config": "Erikwang2013\\IndustrialProtocols\\Framework\\Hyperf\\ConfigProvider"
         }
     },
     "description": "Industrial Protocols 微内核 — 连接管理、配置管理、网关引擎、事件系统、协程适配、框架适配、硬件桥接、厂商配置",

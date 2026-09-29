@@ -14,11 +14,13 @@ use Erikwang2013\IndustrialProtocols\Coroutine\CoroutineFactory;
 use Erikwang2013\IndustrialProtocols\Coroutine\CoroutineAdapterInterface;
 use Erikwang2013\IndustrialProtocols\Event\KernelBootedEvent;
 use Erikwang2013\IndustrialProtocols\Framework\FrameworkAdapterInterface;
+use Erikwang2013\IndustrialProtocols\Framework\HyperfAdapter;
 use Erikwang2013\IndustrialProtocols\Framework\LaravelAdapter;
 use Erikwang2013\IndustrialProtocols\Framework\PlainPhpAdapter;
 use Erikwang2013\IndustrialProtocols\Framework\ThinkPHPAdapter;
 use Erikwang2013\IndustrialProtocols\Framework\WebmanAdapter;
 use Erikwang2013\IndustrialProtocols\Framework\Yii2Adapter;
+use Erikwang2013\IndustrialProtocols\Framework\Yii3Adapter;
 use Erikwang2013\IndustrialProtocols\Log\LogDriverInterface;
 use Erikwang2013\IndustrialProtocols\Log\PsrLogDriver;
 use Erikwang2013\IndustrialProtocols\Protocol\ProtocolRegistry;
@@ -134,8 +136,10 @@ class Kernel
         $adapters = [
             new LaravelAdapter(),
             new WebmanAdapter(),
+            new HyperfAdapter(),
             new ThinkPHPAdapter(),
             new Yii2Adapter(),
+            new Yii3Adapter(),
             new PlainPhpAdapter(
                 $this->options['config_path']
                 ?? dirname(__DIR__) . '/config/industrial-protocols.php'
