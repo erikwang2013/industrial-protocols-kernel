@@ -26,6 +26,13 @@ class ExternalProcessBridge implements BridgeInterface
 
     public function open(): void
     {
+        // PHP 8.2 starts the shell even when the executable path is missing.
+        if (strpbrk($this->executable, '/\\') !== false
+            && (!is_file($this->executable) || !is_executable($this->executable))
+        ) {
+            throw new \RuntimeException("Failed to start bridge process: {$this->executable}");
+        }
+
         $descriptors = [
             0 => ['pipe', 'r'],  // stdin
             1 => ['pipe', 'w'],  // stdout
