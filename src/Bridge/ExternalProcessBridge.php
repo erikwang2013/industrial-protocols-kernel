@@ -37,7 +37,7 @@ class ExternalProcessBridge implements BridgeInterface
 
         $cmd = escapeshellcmd($this->executable);
 
-        $this->process = proc_open($cmd, $descriptors, $this->pipes, $cwd, $env);
+        $this->process = @proc_open($cmd, $descriptors, $this->pipes, $cwd, $env);
 
         if (!is_resource($this->process)) {
             throw new \RuntimeException("Failed to start bridge process: {$this->executable}");
